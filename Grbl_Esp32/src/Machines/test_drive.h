@@ -15,77 +15,66 @@ Notes:
  - Limit pins use ESP32 ADC pins (A2..A5) where appropriate (input-only pins).
 */
 
-#define MACHINE_NAME            "External 4 Axis Driver Board V2 (CNC Shield V3 map)"
+$ifdef CPU_MAP_ESP32DUINO32_CNCSHIELD
+// This is the CPU Map for the ESP32 CNC SHIELD Controller
 
-#ifdef N_AXIS
-    #undef N_AXIS
-#endif
-#define N_AXIS 4
+// It is OK to comment out any step and direction pins. This
+// won’t affect operation except that there will be no output
+// form the pins. Grbl will virtually move the axis. This could
+// be handy if you are using a servo, etc. for another axis.
+#define X_STEP_PIN GPIO_NUM_26
+#define Y_STEP_PIN GPIO_NUM_25
+#define Z_STEP_PIN GPIO_NUM_17
 
-// ======= STEP / DIRECTION (CNC Shield D2..D7) =======
-// Mapping based on common Wemos D1 R32 UNO-form mapping:
-// D2 -> GPIO16, D3 -> GPIO17, D4 -> GPIO21, D5 -> GPIO22, D6 -> GPIO23, D7 -> GPIO19
+#define X_DIRECTION_PIN GPIO_NUM_16
+#define Y_DIRECTION_PIN GPIO_NUM_27
+#define Z_DIRECTION_PIN GPIO_NUM_14
 
-#define X_STEP_PIN              GPIO_NUM_16   // D2
-#define X_DIRECTION_PIN         GPIO_NUM_22   // D5
+// OK to comment out to use pin for other features
+#define STEPPERS_DISABLE_PIN GPIO_NUM_12
 
-#define Y_STEP_PIN              GPIO_NUM_17   // D3
-#define Y_DIRECTION_PIN         GPIO_NUM_23   // D6
+// *** the flood coolant feature code is activated by defining this pins
+// *** Comment it out to use the pin for other features
+//#define COOLANT_FLOOD_PIN GPIO_NUM_34
+//#define COOLANT_MIST_PIN GPIO_NUM_21
 
-#define Z_STEP_PIN              GPIO_NUM_21   // D4
-#define Z_DIRECTION_PIN         GPIO_NUM_19   // D7
+// If SPINDLE_PWM_PIN is commented out, this frees up the pin, but Grbl will still
+// use a virtual spindle. Do not comment out the other parameters for the spindle.
+#define SPINDLE_PWM_PIN GPIO_NUM_19
+#define SPINDLE_PWM_CHANNEL 0
+// PWM Generator is based on 80,000,000 Hz counter
+// Therefor the freq determines the resolution
+// 80,000,000 / freq = max resolution
+// For 5000 that is 80,000,000 / 5000 = 16000
+// round down to nearest bit count for SPINDLE_PWM_MAX_VALUE = 13bits (8192)
+#define SPINDLE_PWM_BASE_FREQ 5000 // Hz
+#define SPINDLE_PWM_BIT_PRECISION 8 // be sure to match this with SPINDLE_PWM_MAX_VALUE
+#define SPINDLE_PWM_OFF_VALUE 0
+#define SPINDLE_PWM_MAX_VALUE 255 // (2^SPINDLE_PWM_BIT_PRECISION)
 
-// 4th axis (A) - map to D10/D9 to avoid using D11/D12 which may be used by spindle/SPI
-#define A_STEP_PIN              GPIO_NUM_26   // D10
-#define A_DIRECTION_PIN         GPIO_NUM_27   // D9
+Advertisement
 
-// Steppers enable = CNC Shield D8 -> Wemos D1 R32 GPIO12 (BOOT STRAP PIN)
-// If you have R1 (pull-up on EN) on the CNC Shield, this will pull GPIO12 HIGH at boot.
-// Recommended: remove R1 on CNC Shield OR change this pin to a safe GPIO and jumper to D8.
-#define STEPPERS_DISABLE_PIN    GPIO_NUM_12   // D8  <-- WARNING: boot-strap pin
-
-// ======= SPINDLE =======
-// On CNC Shield default: SPINDLE PWM often on D11, enable on D13
-#define SPINDLE_TYPE            SpindleType::HUANYANG // keep your selected type
-#define SPINDLE_OUTPUT_PIN      GPIO_NUM_25   // D11 (PWM)
-#define SPINDLE_ENABLE_PIN      GPIO_NUM_32   // D13
-
-// If you prefer to avoid GPIO12 on D8 and want STEPPERS_DISABLE mapped to safe pin (no PCB mod):
-// uncomment the next line and wire a jumper from GPIO33 to the CNC Shield D8.
-// #define STEPPERS_DISABLE_PIN  GPIO_NUM_33   // alternative safe pin (use a jumper to D8)
-
-// ======= VFD / RS485 =======
-// Original pins could conflict with axis pins. Commented out by default.
-// If you need VFD RS485, pick UART1 pins that are free and not used by axis.
-/*
-#define VFD_RS485_TXD_PIN       GPIO_NUM_17
-#define VFD_RS485_RXD_PIN       GPIO_NUM_4
-#define VFD_RS485_RTS_PIN       GPIO_NUM_16
-*/
-
-// ======= LIMIT SWITCHES =======
-// Use ADC/input-only pins for limit inputs (A2..A5 and A0..A3)
-#define X_LIMIT_PIN             GPIO_NUM_34   // A2
-#define Y_LIMIT_PIN             GPIO_NUM_35   // A3
-#define Z_LIMIT_PIN             GPIO_NUM_36   // A0
-
-#if (N_AXIS != 3)
-    #define A_LIMIT_PIN         GPIO_NUM_39   // A1
+#ifndef SPINDLE_PWM_MIN_VALUE
+#define SPINDLE_PWM_MIN_VALUE 1 // Must be greater than zero.
 #endif
 
-// ======= PROBE & COOLANT =======
-#define PROBE_PIN               GPIO_NUM_14   // A4 (safe GPIO)
-#define COOLANT_MIST_PIN        GPIO_NUM_33   // use available safe pin (D12 alternative)
+#define SPINDLE_PWM_RANGE (SPINDLE_PWM_MAX_VALUE-SPINDLE_PWM_MIN_VALUE)
 
-// ======= SD CARD (SPI MODE) =======
-// CNC Shield uses D11..D13 for some functions - be careful if using SD card and shield simultaneously.
-// Adjust wiring if you need both.
-#define SD_CARD_MOSI_PIN        GPIO_NUM_23
-#define SD_CARD_MISO_PIN        GPIO_NUM_19
-#define SD_CARD_SCK_PIN         GPIO_NUM_18
-#define SD_CARD_CS_PIN          GPIO_NUM_5
+// if these spindle function pins are defined, they will be activated in the code
+// comment them out to use the pins for other functions
+//#define SPINDLE_ENABLE_PIN GPIO_NUM_16
+//#define SPINDLE_DIR_PIN GPIO_NUM_16
 
-// Aktifkan dukungan SD card di Grbl_ESP32 (comment out if SPI pins conflict with your setup)
-#define USE_SD_CARD
+#define X_LIMIT_PIN GPIO_NUM_13
+#define Y_LIMIT_PIN GPIO_NUM_5
+#define Z_LIMIT_PIN GPIO_NUM_23
+#define LIMIT_MASK B111
 
-// End of file
+#define PROBE_PIN GPIO_NUM_36
+
+#define CONTROL_SAFETY_DOOR_PIN GPIO_NUM_39 // needs external pullup
+#define CONTROL_RESET_PIN GPIO_NUM_2 // needs external pullup
+#define CONTROL_FEED_HOLD_PIN GPIO_NUM_4 // needs external pullup
+#define CONTROL_CYCLE_START_PIN GPIO_NUM_35 // needs external pullup
+
+#endif
