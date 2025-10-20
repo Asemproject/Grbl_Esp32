@@ -15,7 +15,7 @@ Notes:
  - Limit pins use ESP32 ADC pins (A2..A5) where appropriate (input-only pins).
 */
 
-$ifdef CPU_MAP_ESP32DUINO32_CNCSHIELD
+#ifdef CPU_MAP_ESP32DUINO32_CNCSHIELD
 // This is the CPU Map for the ESP32 CNC SHIELD Controller
 
 // It is OK to comment out any step and direction pins. This
