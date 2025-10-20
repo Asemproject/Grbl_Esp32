@@ -15,13 +15,11 @@ Notes:
  - Limit pins use ESP32 ADC pins (A2..A5) where appropriate (input-only pins).
 */
 
+#ifdef CPU_MAP_ESP32DUINO32_CNCSHIELD
+
 #define MACHINE_NAME "Test Drive - Demo Only No I/O!"
 // This is the CPU Map for the ESP32 CNC SHIELD Controller
 
-// It is OK to comment out any step and direction pins. This
-// won’t affect operation except that there will be no output
-// form the pins. Grbl will virtually move the axis. This could
-// be handy if you are using a servo, etc. for another axis.
 #define X_STEP_PIN GPIO_NUM_26
 #define Y_STEP_PIN GPIO_NUM_25
 #define Z_STEP_PIN GPIO_NUM_17
@@ -30,44 +28,30 @@ Notes:
 #define Y_DIRECTION_PIN GPIO_NUM_27
 #define Z_DIRECTION_PIN GPIO_NUM_14
 
-// OK to comment out to use pin for other features
 #define STEPPERS_DISABLE_PIN GPIO_NUM_12
 
-// *** the flood coolant feature code is activated by defining this pins
-// *** Comment it out to use the pin for other features
 //#define COOLANT_FLOOD_PIN GPIO_NUM_34
 //#define COOLANT_MIST_PIN GPIO_NUM_21
 
-//Sd card pins
+// SD card pins (SPI di pin non-konflik)
+#define SD_CS_PIN    GPIO_NUM_21
+#define SD_MISO_PIN  GPIO_NUM_33
+#define SD_MOSI_PIN  GPIO_NUM_32
+#define SD_SCK_PIN   GPIO_NUM_18
 
-// contoh: gunakan SPI di pin non-konflik
-#define SD_CS_PIN    GPIO_NUM_21   // CS (pilih pin bebas, mis. 21)
-#define SD_MISO_PIN  GPIO_NUM_33   // MISO (pilih 33)
-#define SD_MOSI_PIN  GPIO_NUM_32   // MOSI (pilih 32)
-#define SD_SCK_PIN   GPIO_NUM_18   // SCK  (18 masih bebas)
-
-// If SPINDLE_PWM_PIN is commented out, this frees up the pin, but Grbl will still
-// use a virtual spindle. Do not comment out the other parameters for the spindle.
 #define SPINDLE_PWM_PIN GPIO_NUM_19
 #define SPINDLE_PWM_CHANNEL 0
-// PWM Generator is based on 80,000,000 Hz counter
-// Therefor the freq determines the resolution
-// 80,000,000 / freq = max resolution
-// For 5000 that is 80,000,000 / 5000 = 16000
-// round down to nearest bit count for SPINDLE_PWM_MAX_VALUE = 13bits (8192)
 #define SPINDLE_PWM_BASE_FREQ 5000 // Hz
-#define SPINDLE_PWM_BIT_PRECISION 8 // be sure to match this with SPINDLE_PWM_MAX_VALUE
+#define SPINDLE_PWM_BIT_PRECISION 8
 #define SPINDLE_PWM_OFF_VALUE 0
-#define SPINDLE_PWM_MAX_VALUE 255 // (2^SPINDLE_PWM_BIT_PRECISION)
+#define SPINDLE_PWM_MAX_VALUE 255
 
 #ifndef SPINDLE_PWM_MIN_VALUE
-#define SPINDLE_PWM_MIN_VALUE 1 // Must be greater than zero.
+#define SPINDLE_PWM_MIN_VALUE 1
 #endif
 
 #define SPINDLE_PWM_RANGE (SPINDLE_PWM_MAX_VALUE-SPINDLE_PWM_MIN_VALUE)
 
-// if these spindle function pins are defined, they will be activated in the code
-// comment them out to use the pins for other functions
 //#define SPINDLE_ENABLE_PIN GPIO_NUM_16
 //#define SPINDLE_DIR_PIN GPIO_NUM_16
 
@@ -78,8 +62,9 @@ Notes:
 
 #define PROBE_PIN GPIO_NUM_36
 
-//#define CONTROL_SAFETY_DOOR_PIN GPIO_NUM_39 // needs external pullup
-#define CONTROL_RESET_PIN GPIO_NUM_2 // needs external pullup
-#define CONTROL_FEED_HOLD_PIN GPIO_NUM_4 // needs external pullup
-#define CONTROL_CYCLE_START_PIN GPIO_NUM_35 // needs external pullup
-#endif
+//#define CONTROL_SAFETY_DOOR_PIN GPIO_NUM_39
+#define CONTROL_RESET_PIN GPIO_NUM_2
+#define CONTROL_FEED_HOLD_PIN GPIO_NUM_4
+#define CONTROL_CYCLE_START_PIN GPIO_NUM_35
+
+#endif // CPU_MAP_ESP32DUINO32_CNCSHIELD
