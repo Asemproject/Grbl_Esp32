@@ -60,8 +60,6 @@ Notes:
 #define SPINDLE_PWM_OFF_VALUE 0
 #define SPINDLE_PWM_MAX_VALUE 255 // (2^SPINDLE_PWM_BIT_PRECISION)
 
-Advertisement
-
 #ifndef SPINDLE_PWM_MIN_VALUE
 #define SPINDLE_PWM_MIN_VALUE 1 // Must be greater than zero.
 #endif
