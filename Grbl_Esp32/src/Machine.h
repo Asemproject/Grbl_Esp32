@@ -3,7 +3,7 @@
 // This file is where you choose the machine type, by including
 // one or more machine definition files as described below.
 
-#ifndef CPU_WEMOS32
+#ifndef MACHINE_NAME
 
 // !!! For initial testing, start with test_drive.h which disables
 // all I/O pins
