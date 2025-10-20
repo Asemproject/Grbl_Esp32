@@ -38,6 +38,14 @@ $ifdef CPU_MAP_ESP32DUINO32_CNCSHIELD
 //#define COOLANT_FLOOD_PIN GPIO_NUM_34
 //#define COOLANT_MIST_PIN GPIO_NUM_21
 
+//Sd card pins
+
+// contoh: gunakan SPI di pin non-konflik
+#define SD_CS_PIN    GPIO_NUM_21   // CS (pilih pin bebas, mis. 21)
+#define SD_MISO_PIN  GPIO_NUM_33   // MISO (pilih 33)
+#define SD_MOSI_PIN  GPIO_NUM_32   // MOSI (pilih 32)
+#define SD_SCK_PIN   GPIO_NUM_18   // SCK  (18 masih bebas)
+
 // If SPINDLE_PWM_PIN is commented out, this frees up the pin, but Grbl will still
 // use a virtual spindle. Do not comment out the other parameters for the spindle.
 #define SPINDLE_PWM_PIN GPIO_NUM_19
