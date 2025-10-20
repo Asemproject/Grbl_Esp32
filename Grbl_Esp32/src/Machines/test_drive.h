@@ -15,7 +15,7 @@ Notes:
  - Limit pins use ESP32 ADC pins (A2..A5) where appropriate (input-only pins).
 */
 
-#ifdef CPU_MAP_ESP32DUINO32_CNCSHIELD
+
 
 #define MACHINE_NAME "Test Drive - Demo Only No I/O!"
 // This is the CPU Map for the ESP32 CNC SHIELD Controller
@@ -66,5 +66,3 @@ Notes:
 #define CONTROL_RESET_PIN GPIO_NUM_2
 #define CONTROL_FEED_HOLD_PIN GPIO_NUM_4
 #define CONTROL_CYCLE_START_PIN GPIO_NUM_35
-
-#endif // CPU_MAP_ESP32DUINO32_CNCSHIELD
