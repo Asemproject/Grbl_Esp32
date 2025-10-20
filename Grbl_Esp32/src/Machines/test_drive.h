@@ -82,5 +82,4 @@ Notes:
 #define CONTROL_RESET_PIN GPIO_NUM_2 // needs external pullup
 #define CONTROL_FEED_HOLD_PIN GPIO_NUM_4 // needs external pullup
 #define CONTROL_CYCLE_START_PIN GPIO_NUM_35 // needs external pullup
-
 #endif
