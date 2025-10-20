@@ -15,7 +15,7 @@ Notes:
  - Limit pins use ESP32 ADC pins (A2..A5) where appropriate (input-only pins).
 */
 
-#define MACHINE_NAME
+#define MACHINE_NAME "Test Drive - Demo Only No I/O!"
 // This is the CPU Map for the ESP32 CNC SHIELD Controller
 
 // It is OK to comment out any step and direction pins. This
