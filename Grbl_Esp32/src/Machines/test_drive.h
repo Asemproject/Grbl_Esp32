@@ -39,7 +39,7 @@
 #define Z_RMT_CHANNEL			2		
 
 // OK to comment out to use pin for other features
-// #define STEPPERS_DISABLE_PIN GPIO_NUM_12	// Uno D8
+#define STEPPERS_DISABLE_PIN GPIO_NUM_12	// Uno D8
 
 #define SPINDLE_PWM_PIN    GPIO_NUM_19    // Uno D12 (Spindle Enable)
 #define SPINDLE_PWM_CHANNEL 0
