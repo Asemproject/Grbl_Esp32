@@ -41,35 +41,38 @@
 // OK to comment out to use pin for other features
 #define STEPPERS_DISABLE_PIN GPIO_NUM_12	// Uno D8
 
-#define SPINDLE_PWM_PIN    GPIO_NUM_19    // Uno D12 (Spindle Enable)
-#define SPINDLE_PWM_CHANNEL 0
-// PWM Generator is based on 80,000,000 Hz counter
-// Therefor the freq determines the resolution
-// 80,000,000 / freq = max resolution
-// For 5000 that is 80,000,000 / 5000 = 16000 
-// round down to nearest bit count for SPINDLE_PWM_MAX_VALUE = 13bits (8192)
-#define SPINDLE_PWM_BASE_FREQ 5000 // Hz
-#define SPINDLE_PWM_BIT_PRECISION 8   // be sure to match this with SPINDLE_PWM_MAX_VALUE
-#define SPINDLE_PWM_OFF_VALUE     0
-#define SPINDLE_PWM_MAX_VALUE     255 // (2^SPINDLE_PWM_BIT_PRECISION)
-
-#ifndef SPINDLE_PWM_MIN_VALUE
-		#define SPINDLE_PWM_MIN_VALUE   1   // Must be greater than zero.
-#endif	
-
-#define SPINDLE_PWM_RANGE         (SPINDLE_PWM_MAX_VALUE-SPINDLE_PWM_MIN_VALUE)		
-
-#define SPINDLE_DIR_PIN		GPIO_NUM_18	// Uno D13
-
-#define COOLANT_FLOOD_PIN 	GPIO_NUM_34  // Uno A3
-#define COOLANT_MIST_PIN   	GPIO_NUM_36// Uno A4
-
 #define X_LIMIT_PIN      		GPIO_NUM_13  // Uno D9
 #define Y_LIMIT_PIN      		GPIO_NUM_5   // Uno D10
 #define Z_LIMIT_PIN     		GPIO_NUM_23  // Uno D11	
 #define LIMIT_MASK      		B111
 
 #define PROBE_PIN       		GPIO_NUM_39  // Uno A5		
+
+#define SPINDLE_ENABLE_PIN    GPIO_NUM_19    // Uno D12 (Spindle Enable)
+
+
+//#define SPINDLE_PWM_CHANNEL 0
+// PWM Generator is based on 80,000,000 Hz counter
+// Therefor the freq determines the resolution
+// 80,000,000 / freq = max resolution
+// For 5000 that is 80,000,000 / 5000 = 16000 
+// round down to nearest bit count for SPINDLE_PWM_MAX_VALUE = 13bits (8192)
+//#define SPINDLE_PWM_BASE_FREQ 5000 // Hz
+//#define SPINDLE_PWM_BIT_PRECISION 8   // be sure to match this with SPINDLE_PWM_MAX_VALUE
+//#define SPINDLE_PWM_OFF_VALUE     0
+//#define SPINDLE_PWM_MAX_VALUE     255 // (2^SPINDLE_PWM_BIT_PRECISION)
+
+//#ifndef SPINDLE_PWM_MIN_VALUE
+//#define SPINDLE_PWM_MIN_VALUE   1   // Must be greater than zero.
+//#endif	
+
+//#define SPINDLE_PWM_RANGE         (SPINDLE_PWM_MAX_VALUE-SPINDLE_PWM_MIN_VALUE)		
+
+#define SPINDLE_DIR_PIN		GPIO_NUM_18	// Uno D13
+
+//#define COOLANT_FLOOD_PIN 	GPIO_NUM_34  // Uno A3
+//#define COOLANT_MIST_PIN   	GPIO_NUM_36// Uno A4
+
 
 // comment out #define IGNORE_CONTROL_PINS in config.h to use control pins  	
 // #define CONTROL_RESET_PIN         GPIO_NUM_2  // Uno A0
