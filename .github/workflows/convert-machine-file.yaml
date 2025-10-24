@@ -3,26 +3,40 @@ on:
   issues:
     types:
       - opened
+
 jobs:
   convert-from-issue:
     if: contains(github.event.issue.title, 'Translate Machine.h')
     runs-on: ubuntu-20.04
     permissions:
       issues: write
+
     steps:
-      - uses: actions/checkout@master
+      - name: Checkout converter repo (DumpConfig branch)
+        uses: actions/checkout@v4
         with:
           repository: bdring/Grbl_Esp32
           ref: refs/heads/DumpConfig
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: get attachment
+      - name: Get attachment URL from issue body and download
         id: download
-        run: |
-          url=($(echo $body | awk -v RS=\( -v FS=\) 'NR>1{print $1}' ))
-          curl -OL $url
-          echo "file_path=${url##*/}" >> $GITHUB_ENV
         env:
-          body: ${{github.event.issue.body}}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          set -euo pipefail
+          echo "Searching for first http(s) URL in issue body..."
+          url=$(echo "$ISSUE_BODY" | grep -oE 'https?://[^ )]+' | head -n1 || true)
+          if [ -z "$url" ]; then
+            echo "No URL found in the issue body."
+            exit 1
+          fi
+          echo "Found URL: $url"
+          # Download the file (supports direct links)
+          curl -L -O "$url"
+          filename=$(basename "$url")
+          echo "Downloaded file: $filename"
+          echo "file_path=${filename}" >> $GITHUB_ENV
 
       - name: Cache pip
         uses: actions/cache@v3
@@ -32,50 +46,65 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Cache PlatformIO
-        uses: actions/cache@v3
-        with:
-          path: ~/.platformio
-          key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
-
       - name: Set up Python
         uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
 
-      - name: Install PlatformIO
+      - name: Install PlatformIO (and optional requirements)
         run: |
           python -m pip install --upgrade pip
           pip install --upgrade platformio
-          
+          if [ -f requirements.txt ]; then pip install -r requirements.txt || true; fi
+
       - name: Convert File
+        id: convert
+        env:
+          FILE_PATH: ${{ env.file_path }}
         run: |
-          mv $file_path Grbl_Esp32/src/Machines/convert-job.h
+          set -euo pipefail
+          echo "Using downloaded file: $FILE_PATH"
+          # move file to working name expected by converter
+          mv "$FILE_PATH" convert-job.h
+          # run converter (assumes convert-machine.py is present in repo root)
+          if [ ! -f convert-machine.py ]; then
+            echo "convert-machine.py not found in repo root."
+            exit 1
+          fi
           python convert-machine.py convert-job.h
-          echo 'file_content<<EOF' >> $GITHUB_ENV
+          # verify output yaml exists
+          if [ ! -f yaml/convert-job.yaml ]; then
+            echo "Converter did not produce yaml/convert-job.yaml"
+            ls -la || true
+            exit 1
+          fi
+          # Put YAML content into environment variable file_content for later comment
+          echo "file_content<<'EOF'" >> $GITHUB_ENV
           cat yaml/convert-job.yaml >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+          echo "Conversion succeeded."
 
       - name: Report errors
         if: failure()
-        uses: peter-evans/create-or-update-comment@40bf395e0ae447ac33928e8d9d1312c104175150
+        uses: peter-evans/create-or-update-comment@v3
         with:
           issue-number: ${{ github.event.issue.number }}
           body: |
             Dear ${{ github.event.issue.user.login }},
             The attempt to convert your machine header-file ${{ env.file_path }} into a FluidNc yaml file
-            failed due to one of the following possibilities:
-              1. Your machine file had an error.  This can happen if you use an old machine file that
-                 will not compile with the latest version of Grbl_Esp32
+            failed. Possible causes:
+              1. Your machine file had an error or uses an old format incompatible with the converter.
               2. There is a bug in the converter program.
-            If you cannot resolve the problem, please contact us on Discord - https://discord.gg/MDsRDeNsTE
+            Please attach a raw `.h` file (direct link) or contact us on Discord - https://discord.gg/MDsRDeNsTE
 
-      - name: Add comment
-        uses: peter-evans/create-or-update-comment@40bf395e0ae447ac33928e8d9d1312c104175150
+      - name: Add comment with converted YAML
+        uses: peter-evans/create-or-update-comment@v3
         with:
           issue-number: ${{ github.event.issue.number }}
           body: |
             Dear ${{ github.event.issue.user.login }},
-            we converted your machine header-file ${{ env.file_path }} into a corresponding fluidNc yaml-file. 
-            Please copy the following content into your `config.yaml` file and upload the file to your esp32.
-            ```yaml 
-            ${{ env.file_content }} 
+            we converted your machine header-file `${{ env.file_path }}` into a corresponding FluidNC yaml-file.
+            Please copy the following content into your `config.yaml` file and upload it to your ESP32.
+            ```yaml
+            ${{ env.file_content }}
             ```
