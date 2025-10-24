@@ -1,111 +1,112 @@
 name: Convert to FluidNC from Issue
 
 on:
-  workflow_dispatch:   # <-- tambahkan ini supaya muncul "Run workflow"
+  workflow_dispatch:   # Bisa dijalankan manual dari tab Actions
   issues:
     types:
-      - opened
+      - opened          # Juga tetap jalan saat ada issue baru
+
 jobs:
   convert-from-issue:
-    if: contains(github.event.issue.title, 'Translate Machine.h')
+    # Hilangkan 'if:' supaya bisa dijalankan manual
     runs-on: ubuntu-20.04
     permissions:
       issues: write
+      contents: read
 
     steps:
       - name: Checkout converter repo (DumpConfig branch)
         uses: actions/checkout@v4
         with:
           repository: bdring/Grbl_Esp32
-          ref: refs/heads/DumpConfig
+          ref: DumpConfig
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Get attachment URL from issue body and download
-        id: download
+      - name: Get attachment URL from issue body (if triggered by issue)
+        id: geturl
+        if: github.event_name == 'issues'
         env:
           ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
           set -euo pipefail
-          echo "Searching for first http(s) URL in issue body..."
+          echo "🔍 Mencari URL di body issue..."
           url=$(echo "$ISSUE_BODY" | grep -oE 'https?://[^ )]+' | head -n1 || true)
           if [ -z "$url" ]; then
-            echo "No URL found in the issue body."
+            echo "❌ Tidak ditemukan URL di body issue."
             exit 1
           fi
-          echo "Found URL: $url"
-          # Download the file (supports direct links)
+          echo "✅ Ditemukan URL: $url"
           curl -L -O "$url"
           filename=$(basename "$url")
-          echo "Downloaded file: $filename"
           echo "file_path=${filename}" >> $GITHUB_ENV
 
-      - name: Cache pip
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+      - name: Manual mode - gunakan file test jika run manual
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "⚙️ Mode manual dijalankan."
+          echo "Pastikan file convert-job.h tersedia di repo."
+          if [ ! -f convert-job.h ]; then
+            echo "File convert-job.h tidak ditemukan!"
+            exit 1
+          fi
+          echo "file_path=convert-job.h" >> $GITHUB_ENV
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
-      - name: Install PlatformIO (and optional requirements)
+      - name: Install PlatformIO dan dependencies
         run: |
           python -m pip install --upgrade pip
           pip install --upgrade platformio
           if [ -f requirements.txt ]; then pip install -r requirements.txt || true; fi
 
-      - name: Convert File
+      - name: Jalankan converter
         id: convert
         env:
           FILE_PATH: ${{ env.file_path }}
         run: |
           set -euo pipefail
-          echo "Using downloaded file: $FILE_PATH"
-          # move file to working name expected by converter
+          echo "🚀 Mengonversi file: $FILE_PATH"
           mv "$FILE_PATH" convert-job.h
-          # run converter (assumes convert-machine.py is present in repo root)
           if [ ! -f convert-machine.py ]; then
-            echo "convert-machine.py not found in repo root."
+            echo "❌ File convert-machine.py tidak ditemukan!"
             exit 1
           fi
           python convert-machine.py convert-job.h
-          # verify output yaml exists
           if [ ! -f yaml/convert-job.yaml ]; then
-            echo "Converter did not produce yaml/convert-job.yaml"
-            ls -la || true
+            echo "❌ YAML tidak dihasilkan."
+            ls -la yaml || true
             exit 1
           fi
-          # Put YAML content into environment variable file_content for later comment
           echo "file_content<<'EOF'" >> $GITHUB_ENV
           cat yaml/convert-job.yaml >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
-          echo "Conversion succeeded."
+          echo "✅ Konversi berhasil."
 
-      - name: Report errors
-        if: failure()
+      - name: Laporkan error ke Issue
+        if: failure() && github.event_name == 'issues'
         uses: peter-evans/create-or-update-comment@v3
         with:
           issue-number: ${{ github.event.issue.number }}
           body: |
-            Dear ${{ github.event.issue.user.login }},
-            The attempt to convert your machine header-file ${{ env.file_path }} into a FluidNc yaml file
-            failed. Possible causes:
-              1. Your machine file had an error or uses an old format incompatible with the converter.
-              2. There is a bug in the converter program.
-            Please attach a raw `.h` file (direct link) or contact us on Discord - https://discord.gg/MDsRDeNsTE
+            ❌ **Konversi gagal**
+            File `${{ env.file_path }}` tidak dapat dikonversi ke YAML.
+            Kemungkinan penyebab:
+            1. Format lama Grbl_ESP32 yang tidak kompatibel
+            2. Bug pada skrip converter
+            Hubungi kami di Discord: https://discord.gg/MDsRDeNsTE
 
-      - name: Add comment with converted YAML
+      - name: Tambahkan hasil YAML ke komentar Issue
+        if: success() && github.event_name == 'issues'
         uses: peter-evans/create-or-update-comment@v3
         with:
           issue-number: ${{ github.event.issue.number }}
           body: |
-            Dear ${{ github.event.issue.user.login }},
-            we converted your machine header-file `${{ env.file_path }}` into a corresponding FluidNC yaml-file.
-            Please copy the following content into your `config.yaml` file and upload it to your ESP32.
+            ✅ **Konversi Berhasil**
+            File `${{ env.file_path }}` berhasil diubah ke YAML.
+            Salin konten berikut ke `config.yaml` dan upload ke ESP32 kamu:
             ```yaml
             ${{ env.file_content }}
             ```
