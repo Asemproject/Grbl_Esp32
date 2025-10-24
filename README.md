@@ -1,5 +1,7 @@
 
+---
 🧭 Grbl_ESP32 for WeMos D1 R32 + CNC Shield V3 (Protoneer)
+---
 
 Overview
 
@@ -91,9 +93,10 @@ Kompatibel dengan G-code sender seperti Candle, UGS, LaserGRBL, dll.
 
 
 
----
 
 🚀 Kompilasi dan Upload Firmware
+
+---
 
 1. Instal PlatformIO
 
@@ -109,7 +112,7 @@ pio run
 
 pio run -t upload
 
-
+---
 
 Atau jika menggunakan Arduino IDE:
 
@@ -125,16 +128,7 @@ Upload file .ino utama Grbl_ESP32
 
 File utama yang digunakan:
 
-/src/Machines/espduino_protoneer.h
-
-Jika ingin membuat konfigurasi baru:
-
 /src/Machines/wemos_protoneer_v3.h
-
-Lalu ubah di Machine.h:
-
-#include "Machines/wemos_protoneer_v3.h"
-
 
 ---
 
@@ -155,7 +149,5 @@ Original GRBL: Sonny Jeon
 Grbl_ESP32 Port: Bart Dring
 
 Konfigurasi Wemos + Protoneer CNC V3: AsemProject
-
-
 
 ---
