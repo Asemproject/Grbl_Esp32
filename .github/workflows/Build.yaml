@@ -39,9 +39,28 @@ jobs:
       - name: Build firmware
         run: pio run
 
-      # Create (or update) a GitHub release and upload generated firmware files
-      # Uses ncipollo/release-action which accepts file globs.
-      - name: Create GitHub Release and upload assets
+      - name: Find firmware files and fail if none
+        run: |
+          shopt -s nullglob
+          files=(.pio/build/*/*.bin .pio/build/*/*.elf)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No firmware files found in .pio/build/. Build failed or output path changed."
+            echo "Listing .pio directory for debugging:"
+            ls -la .pio || true
+            exit 1
+          fi
+          echo "Found firmware files:"
+          printf " - %s\n" "${files[@]}"
+
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: |
+            .pio/build/*/*.bin
+            .pio/build/*/*.elf
+
+      - name: Create GitHub Release and attach firmware artifact
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ github.event.inputs.tag }}
@@ -49,6 +68,4 @@ jobs:
           body: ${{ github.event.inputs.release_body }}
           draft: ${{ github.event.inputs.draft }}
           prerelease: ${{ github.event.inputs.prerelease }}
-          files: |
-            .pio/build/*/*.bin
-            .pio/build/*/*.elf
+          artifacts: firmware
