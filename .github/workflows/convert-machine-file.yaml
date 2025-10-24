@@ -9,7 +9,7 @@ on:
 jobs:
   convert-from-issue:
     # Hilangkan 'if:' supaya bisa dijalankan manual
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     permissions:
       issues: write
       contents: read
