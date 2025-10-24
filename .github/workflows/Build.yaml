@@ -24,9 +24,10 @@ on:
         default: 'false'
 
 jobs:
-  build-and-release:
+  build:
     runs-on: ubuntu-latest
-
+    outputs:
+      firmware_found: ${{ steps.find.outputs.found }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -40,19 +41,22 @@ jobs:
         run: pio run
 
       - name: Find firmware files and fail if none
+        id: find
         run: |
           shopt -s nullglob
           files=(.pio/build/*/*.bin .pio/build/*/*.elf)
           if [ ${#files[@]} -eq 0 ]; then
+            echo "found=false" >> $GITHUB_OUTPUT
             echo "No firmware files found in .pio/build/. Build failed or output path changed."
-            echo "Listing .pio directory for debugging:"
             ls -la .pio || true
             exit 1
           fi
           echo "Found firmware files:"
           printf " - %s\n" "${files[@]}"
+          echo "found=true" >> $GITHUB_OUTPUT
 
       - name: Upload firmware artifact
+        if: ${{ steps.find.outputs.found == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: firmware
@@ -60,6 +64,10 @@ jobs:
             .pio/build/*/*.bin
             .pio/build/*/*.elf
 
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Create GitHub Release and attach firmware artifact
         uses: ncipollo/release-action@v1
         with:
