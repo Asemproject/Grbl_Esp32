@@ -2,13 +2,13 @@
 // clang-format off
 
 /*
-		espduino_protoneer.h
+		wemos_esp32_protoneer_v3.h
 		Part of Grbl_ESP32
 
 	   Protoneer CNC Shield with ESPduino board
 	   
 
-		2021    - DeeEmm
+		2025    - Asemproject 
 
 		Grbl_ESP32 is free software: you can redistribute it and/or modify
 		it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 		along with Grbl_ESP32.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define MACHINE_NAME "ESPDUINO_PROTONEER"
+#define MACHINE_NAME "WEMOS_ESP32_PROTONEER_V3"
 
 #define X_STEP_PIN      		GPIO_NUM_26  // Uno D2
 #define X_DIRECTION_PIN  		GPIO_NUM_16  // Uno D5
@@ -75,8 +75,8 @@
 
 
 // comment out #define IGNORE_CONTROL_PINS in config.h to use control pins  	
-// #define CONTROL_RESET_PIN         GPIO_NUM_2  // Uno A0
-// #define CONTROL_FEED_HOLD_PIN     GPIO_NUM_4  // Uno A1 
+#define CONTROL_RESET_PIN         GPIO_NUM_2  // Uno A0
+#define CONTROL_FEED_HOLD_PIN     GPIO_NUM_4  // Uno A1 
 // #define CONTROL_CYCLE_START_PIN   GPIO_NUM_35  // Uno A2 ... ESP32 needs external pullup
 
 
