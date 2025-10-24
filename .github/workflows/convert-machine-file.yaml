@@ -1,9 +1,10 @@
 name: Convert to FluidNC from Issue
+
 on:
+  workflow_dispatch:   # <-- tambahkan ini supaya muncul "Run workflow"
   issues:
     types:
       - opened
-
 jobs:
   convert-from-issue:
     if: contains(github.event.issue.title, 'Translate Machine.h')
