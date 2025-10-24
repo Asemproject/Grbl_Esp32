@@ -1,4 +1,3 @@
----
 
 🧭 Grbl_ESP32 for WeMos D1 R32 + CNC Shield V3 (Protoneer)
 
@@ -12,9 +11,6 @@ Shield: Protoneer CNC Shield V3 (Arduino Uno-compatible pinout)
 
 
 Firmware ini membawa fitur dan keunggulan Grbl klasik dengan kemampuan tambahan dari ESP32 seperti WiFi, WebUI, dan kontrol motor yang lebih cepat dan presisi.
-
-
----
 
 ⚙️ Hardware Setup
 
